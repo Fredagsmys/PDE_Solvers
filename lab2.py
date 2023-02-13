@@ -35,8 +35,9 @@ def my_stiffness_matrix_assembler(x):
         A[i, i+1] += -1/h
         A[i+1, i] += -1/h
         A[i+1, i+1] += 1/h
-    A[0, 0] = 1e+6                 # adjust for BC
-    A[N, N] = 1e+6
+    A[0, 0] = 10E6                 # adjust for BC
+    # A[N, N] = 10E6
+    # print(A.toarray()) 
     return A.tocsr()
 
 def my_load_vector_assembler(x):
@@ -50,6 +51,9 @@ def my_load_vector_assembler(x):
         h = x[i+1] - x[i]
         B[i] = B[i] + f(x[i])*h/2
         B[i+1] = B[i+1] + f(x[i+1])*h/2
+    # B[0] = 0
+    B[N] +=7
+    print(B)
     return B
 
 def f(x):
@@ -58,30 +62,18 @@ def f(x):
 def main():
     a = 0                                 # left end point of interval
     b = 1                                 # right
-    N1 = 500
-    N2 = 1000                               # number of intervals
-    h1 = (b-a)/N1                           # mesh size
-    x1 = np.arange(a, b, h1)                # node coords
-    A1 = my_stiffness_matrix_assembler(x1)
-    B1 = my_load_vector_assembler(x1)
-    xi1 = splg.spsolve(A1, B1)               # solve system of equations
-    h2 = (b-a)/N2                           # mesh size
-    x2 = np.arange(a, b, h2)                # node coords
-    A2 = my_stiffness_matrix_assembler(x2)
-    B2 = my_load_vector_assembler(x2)
-    xi2 = splg.spsolve(A2, B2) 
-
-    # plt.plot(x, xi)                       # plot solution
-    # plt.xlabel('x')
-    x = np.arange(a,b,h1)
-    exact = x*(1-x)
-    # plt.plot(x,x*(1-x),'g')
-    # plt.show()    
-    print(np.linalg.norm(exact,2))
-    print(np.linalg.norm(xi1,2))
-    print(np.linalg.norm(xi2,2))
-    error = math.log(-1*(np.linalg.norm(xi2,1)-np.linalg.norm(exact,1))/(np.linalg.norm(xi1,1)-np.linalg.norm(exact,1)),2)
+    N = 1000                         # number of intervals
+    h = (b-a)/N                           # mesh size
+    x = np.arange(a, b, h)                # node coords
+    A = my_stiffness_matrix_assembler(x)
+    B = my_load_vector_assembler(x)
+    xi = splg.spsolve(A, B)               # solve system of equations
     
-    print(error)
+
+    plt.plot(x, xi,'b')                       # plot solution
+    plt.xlabel('x')
+    plt.plot(x,x*(8-x),'g')
+    # plt.plot(x,7*x,'g')
+    plt.show()
 if __name__ == '__main__':
     main()  
