@@ -79,6 +79,7 @@ def run_simulation(mx=100, order=2, show_animation=True):
     def rhs(u):
         tauL = c^2
         tauR = -c^2
+        
         res = c**2*D2@u+tauL*np.linalg.inv(H)*e_l*np.transpose(d1_l)@u + tauR*np.linalg.inv(H)*e_r*d1_r@u
         # print(res)
         return res
@@ -105,10 +106,10 @@ def run_simulation(mx=100, order=2, show_animation=True):
     for tidx in range(mt-1):
 
         # Take one step with the fourth order Runge-Kutta method.
-        u, t = rk4.step(rhs, u, t, ht)
+        u, t = rk4.step(rhs, u, t, ht) #Problem: RK4 only solves ODE on form y' = rhs, we have y'' = rhs
 
         # Update plot every 50th time step
-        if tidx % 1 == 0 and show_animation: 
+        if tidx % 5 == 0 and show_animation: 
             line.set_ydata(u)
             title.set_text(f't = {t:.2f}')
             plt.draw()
