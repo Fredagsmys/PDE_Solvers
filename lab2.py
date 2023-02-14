@@ -36,7 +36,7 @@ def my_stiffness_matrix_assembler(x):
         A[i+1, i] += -1/h
         A[i+1, i+1] += 1/h
     A[0, 0] = 10E6                 # adjust for BC
-    # A[N, N] =1e+3
+    A[N, N] =10E6
     print(A.toarray()) 
     return A.tocsr()
 
@@ -51,7 +51,7 @@ def my_load_vector_assembler(x):
         h = x[i+1] - x[i]
         B[i] = B[i] + f(x[i])*h/2
         B[i+1] = B[i+1] + f(x[i+1])*h/2
-    B[N] += 7
+    B[N] = 10E6*8
     print(B)
     return B
 
@@ -61,7 +61,7 @@ def f(x):
 def main():
     a = 0                                 # left end point of interval
     b = 1                                 # right
-    N = 100                       # number of intervals
+    N = 1000                       # number of intervals
     h = (b-a)/N                           # mesh size
     x = np.arange(a, b, h)                # node coords
     A = my_stiffness_matrix_assembler(x)
@@ -71,8 +71,7 @@ def main():
 
     plt.plot(x, xi,'b')                       # plot solution
     plt.xlabel('x')
-    plt.plot(x,x*(8-x),'g')
-    # plt.plot(x,7*x,'g')
+    plt.plot(x,x*(9-x),'g')
     plt.show()
 if __name__ == '__main__':
     main()  
