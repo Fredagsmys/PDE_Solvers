@@ -44,11 +44,12 @@ def run_simulation(mx=100, order=2, show_animation=True):
     """
 
     # Model parameters
-    c = 1 # wave speed
+    c = 3 # wave speed
     T = 3 # end time
     xl = -1 # left boundary
     xr = 1 # right boundary
     L = xr - xl # domain length
+    k = 2*np.pi
 
     # Space discretization
     hx = (xr - xl)/mx
@@ -73,7 +74,7 @@ def run_simulation(mx=100, order=2, show_animation=True):
     # print(f"d1_l: {spsp.csr_matrix.transpose(d1_l[0])}")
     # print(f"transpose:{np.linalg.inv(d1_l.toarray()[0])}")
     # print(f"H: {spsplg.inv(H).get_shape()}")
-    print("Hej")
+    
 
     # Define right-hand-side function
     def rhs(u):
@@ -90,12 +91,15 @@ def run_simulation(mx=100, order=2, show_animation=True):
 
     # Initialize time variable and solution vector
     t = 0
-    u = f(xvec)
+    # u = f(xvec)
+    phi = np.cos(k*xvec)
+    phi_t = np.zeros(np.shape(xvec))
+    w  =np.array([phi,phi_t])
 
     # Initialize plot for animation
     if show_animation:
         fig, ax = plt.subplots()
-        [line] = ax.plot(xvec, u, label='Approximation')
+        [line] = ax.plot(xvec, w[0], label='Approximation')
         ax.set_xlim([xl, xr-hx])
         ax.set_ylim([-1, 1.2])
         title = plt.title(f't = {0:.2f}')
@@ -106,11 +110,11 @@ def run_simulation(mx=100, order=2, show_animation=True):
     for tidx in range(mt-1):
 
         # Take one step with the fourth order Runge-Kutta method.
-        u, t = rk4.step(rhs, u, t, ht) #Problem: RK4 only solves ODE on form y' = rhs, we have y'' = rhs
+        w, t = rk4.step(rhs, w, t, ht) #Problem: RK4 only solves ODE on form y' = rhs, we have y'' = rhs
 
         # Update plot every 50th time step
         if tidx % 5 == 0 and show_animation: 
-            line.set_ydata(u)
+            line.set_ydata(w[0])
             title.set_text(f't = {t:.2f}')
             plt.draw()
             plt.pause(1e-8)
@@ -119,7 +123,7 @@ def run_simulation(mx=100, order=2, show_animation=True):
     if show_animation:
         plt.close()
 
-    return u, T, xvec, hx, L, c
+    return w, T, xvec, hx, L, c
 
 def exact_solution(t, xvec, L, c):
     T1 = L/c  # Time for one lap
