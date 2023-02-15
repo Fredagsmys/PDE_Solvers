@@ -15,9 +15,10 @@ def step(f, v, t, dt):
     k2 = dt*f(v + 0.5*k1)
     k3 = dt*f(v + 0.5*k2)
     k4 = dt*f(v + k3)
-
     # Update solution and time
+    print(v)
     v = v + 1/6*(k1 + 2*k2 + 2*k3 + k4)
+    print(v)
+    x = input("step [enter]")
     t = t + dt
-
     return v, t
