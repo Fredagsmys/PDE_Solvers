@@ -34,7 +34,7 @@ import rungekutta4 as rk4
 def f(x):
     return np.exp(-((x - 0.5)/0.05)**2)
 
-def run_simulation(mx=1000, order=2, show_animation=True):
+def run_simulation(mx=100, order=2, show_animation=True):
     """Solves the advection equation using finite differences
     and Runge-Kutta 4.
     
@@ -50,26 +50,41 @@ def run_simulation(mx=1000, order=2, show_animation=True):
     xr = 1 # right boundary
     L = xr - xl # domain length
     k = 2*np.pi
-    tauL = c^2
-    tauR = -c^2
+    tauL = c**2
+    tauR = -c**2
+
     # Space discretization
     hx = (xr - xl)/mx
     xvec = np.linspace(xl, xr-hx, mx) # periodic, u(xl) = u(xr)
+    # _, _, D1 = ops.periodic_expl(mx, hx, order)
     H,HI,D1,D2,e_l,e_r,d1_l,d1_r = ops.sbp_cent_6th(mx,hx)
 
+    # print(f"e_l{np.array(e_l.toarray()[0])}")
     e_l = np.array(e_l.toarray())
     e_r = np.array(e_r.toarray())
     d1_l = np.array(d1_l.toarray())
     d1_r = np.array(d1_r.toarray())
     
+    # print(np.array(H.toarray()))
     H = np.array(H.toarray())
+    # print(H)
     D2 = np.array(D2.toarray())
+    D = c**2*D2 + tauL*np.linalg.inv(H)@e_l.T@d1_l + tauR*np.linalg.inv(H)@e_r.T@d1_r
+    # print(f"e_l: {e_l.shape.T}")
+    # print(d1_l.shape)
+    # print(f"e_l: {e_l.get_shape()}")
+    # print(f"d1_l:{d1_l[0]}")
+    # print(f"d1_l: {spsp.csr_matrix.transpose(d1_l[0])}")
+    # print(f"transpose:{np.linalg.inv(d1_l.toarray()[0])}")
+    # print(f"H: {spsplg.inv(H).get_shape()}")
     
 
     # Define right-hand-side function
     def rhs(u):
-        res = c**2*D2@u[0] + tauL*np.linalg.inv(H)*e_l*np.transpose(d1_l)@u[0] + tauR*np.linalg.inv(H)*e_r*np.transpose(d1_r)@u[0]
         
+        
+        res = np.array([u[1],D@u[0]])
+        # print(res)
         return res
     # Time discretization
     ht_try = 0.1*hx/c
@@ -82,7 +97,6 @@ def run_simulation(mx=1000, order=2, show_animation=True):
     phi = np.cos(k*xvec)
     phi_t = np.zeros(np.shape(xvec))
     w = np.array([phi,phi_t])
-    
 
     # Initialize plot for animation
     if show_animation:
@@ -99,8 +113,7 @@ def run_simulation(mx=1000, order=2, show_animation=True):
 
         # Take one step with the fourth order Runge-Kutta method.
         w, t = rk4.step(rhs, w, t, ht) #Problem: RK4 only solves ODE on form y' = rhs, we have y'' = rhs
-        # Update solution and time
-        t = t + ht
+
         # Update plot every 50th time step
         if tidx % 5 == 0 and show_animation: 
             line.set_ydata(w[0])
@@ -112,7 +125,7 @@ def run_simulation(mx=1000, order=2, show_animation=True):
     if show_animation:
         plt.close()
 
-    return w[0], T, xvec, hx, L, c
+    return w, T, xvec, hx, L, c
 
 def exact_solution(t, xvec, L, c):
     T1 = L/c  # Time for one lap
@@ -144,9 +157,9 @@ def main():
     order = 2  # Order of accuracy. 2, 4, 6, 8, 10, or 12.
     u, T, xvec, hx, L, c = run_simulation(m, order)
     u_exact = exact_solution(T, xvec, L, c)
-    error = compute_error(u, u_exact, hx)
+    error = compute_error(u[0], u_exact, hx)
     print(f'L2-error: {error:.2e}')
-    plot_final_solution(u, u_exact, xvec, T)
+    plot_final_solution(u[0], u_exact, xvec, T)
 
 if __name__ == '__main__':
     main()    
