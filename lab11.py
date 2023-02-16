@@ -45,7 +45,7 @@ def run_simulation(mx=100, order=2, show_animation=True):
 
     # Model parameters
     c = 3 # wave speed
-    T = 3 # end time
+    T = 1 # end time
     xl = -1 # left boundary
     xr = 1 # right boundary
     L = xr - xl # domain length
@@ -57,7 +57,7 @@ def run_simulation(mx=100, order=2, show_animation=True):
     hx = (xr - xl)/mx
     xvec = np.linspace(xl, xr-hx, mx) # periodic, u(xl) = u(xr)
     # _, _, D1 = ops.periodic_expl(mx, hx, order)
-    H,HI,D1,D2,e_l,e_r,d1_l,d1_r = ops.sbp_cent_6th(mx,hx)
+    H,HI,D1,D2,e_l,e_r,d1_l,d1_r = ops.sbp_cent_2nd(mx,hx)
 
     # print(f"e_l{np.array(e_l.toarray()[0])}")
     e_l = np.array(e_l.toarray())
@@ -93,7 +93,6 @@ def run_simulation(mx=100, order=2, show_animation=True):
 
     # Initialize time variable and solution vector
     t = 0
-    # u = f(xvec)
     phi = np.cos(k*xvec)
     phi_t = np.zeros(np.shape(xvec))
     w = np.array([phi,phi_t])
@@ -128,9 +127,12 @@ def run_simulation(mx=100, order=2, show_animation=True):
     return w, T, xvec, hx, L, c
 
 def exact_solution(t, xvec, L, c):
-    T1 = L/c  # Time for one lap
-    t_eff = (t/T1 - np.floor(t/T1))*T1  # "Effective" time, using periodicity
-    u_exact = f(xvec - c*t_eff)
+    # T1 = L/c  # Time for one lap
+    # t_eff = (t/T1 - np.floor(t/T1))*T1  # "Effective" time, using periodicity
+    # u_exact = f(xvec - c*t_eff)
+    C1 = 1
+    C2 = 1
+    u_exact = C1*np.cos(2*np.pi*xvec)
     return u_exact
 
 def l2_norm(vec, h):
@@ -153,7 +155,7 @@ def plot_final_solution(u, u_exact, xvec, T):
     plt.show()
 
 def main():
-    m = 200   # Number of grid points, integer > 15.
+    m = 100   # Number of grid points, integer > 15.
     order = 2  # Order of accuracy. 2, 4, 6, 8, 10, or 12.
     u, T, xvec, hx, L, c = run_simulation(m, order)
     u_exact = exact_solution(T, xvec, L, c)
