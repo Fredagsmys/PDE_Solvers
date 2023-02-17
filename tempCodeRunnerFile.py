@@ -1,2 +1,4 @@
-m(error_vec, hx)/l2_norm(u_exact, hx)
-    return relative_l2_error
+
+    # print(Dxx[0].shape)
+    # print(Dxx[0][0].shape)
+    # print(np.reshape(Dxx,(20000,20000)))
