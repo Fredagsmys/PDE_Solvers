@@ -33,8 +33,16 @@ import rungekutta4 as rk4
 # Initial data
 def f(x):
     return np.exp(-((x - 0.5)/0.05)**2)
-
-def run_simulation(mx=100, order=2, show_animation=True):
+# Model parameters
+c = 3 # wave speed
+T = np.pi # end time
+xl = -1 # left boundary
+xr = 1 # right boundary
+L = xr - xl # domain length
+k = 2*np.pi
+tauL = c**2
+tauR = -c**2
+def run_simulation(mx=100, method=ops.sbp_cent_6th, show_animation=True):
     """Solves the advection equation using finite differences
     and Runge-Kutta 4.
     
@@ -42,47 +50,23 @@ def run_simulation(mx=100, order=2, show_animation=True):
     mx:     Number of grid points, integer > 15.
     order:  Order of accuracy, 2, 4, 6, 8, 10 or 12
     """
-
-    # Model parameters
-    c = 3 # wave speed
-    T = 1 # end time
-    xl = -1 # left boundary
-    xr = 1 # right boundary
-    L = xr - xl # domain length
-    k = 2*np.pi
-    tauL = c**2
-    tauR = -c**2
-
     # Space discretization
     hx = (xr - xl)/mx
     xvec = np.linspace(xl, xr-hx, mx) # periodic, u(xl) = u(xr)
     # _, _, D1 = ops.periodic_expl(mx, hx, order)
-    H,HI,D1,D2,e_l,e_r,d1_l,d1_r = ops.sbp_cent_2nd(mx,hx)
+    H,HI,D1,D2,e_l,e_r,d1_l,d1_r = method(mx,hx)
 
     # print(f"e_l{np.array(e_l.toarray()[0])}")
     e_l = np.array(e_l.toarray())
     e_r = np.array(e_r.toarray())
     d1_l = np.array(d1_l.toarray())
     d1_r = np.array(d1_r.toarray())
-    
-    # print(np.array(H.toarray()))
     H = np.array(H.toarray())
-    # print(H)
     D2 = np.array(D2.toarray())
     D = c**2*D2 + tauL*np.linalg.inv(H)@e_l.T@d1_l + tauR*np.linalg.inv(H)@e_r.T@d1_r
-    # print(f"e_l: {e_l.shape.T}")
-    # print(d1_l.shape)
-    # print(f"e_l: {e_l.get_shape()}")
-    # print(f"d1_l:{d1_l[0]}")
-    # print(f"d1_l: {spsp.csr_matrix.transpose(d1_l[0])}")
-    # print(f"transpose:{np.linalg.inv(d1_l.toarray()[0])}")
-    # print(f"H: {spsplg.inv(H).get_shape()}")
-    
 
     # Define right-hand-side function
     def rhs(u):
-        
-        
         res = np.array([u[1],D@u[0]])
         # print(res)
         return res
@@ -111,10 +95,9 @@ def run_simulation(mx=100, order=2, show_animation=True):
     for tidx in range(mt-1):
 
         # Take one step with the fourth order Runge-Kutta method.
-        w, t = rk4.step(rhs, w, t, ht) #Problem: RK4 only solves ODE on form y' = rhs, we have y'' = rhs
-
+        w, t = rk4.step(rhs, w, t, ht)
         # Update plot every 50th time step
-        if tidx % 5 == 0 and show_animation: 
+        if tidx % 20 == 0 and show_animation: 
             line.set_ydata(w[0])
             title.set_text(f't = {t:.2f}')
             plt.draw()
@@ -130,9 +113,9 @@ def exact_solution(t, xvec, L, c):
     # T1 = L/c  # Time for one lap
     # t_eff = (t/T1 - np.floor(t/T1))*T1  # "Effective" time, using periodicity
     # u_exact = f(xvec - c*t_eff)
-    C1 = 1
-    C2 = 1
-    u_exact = C1*np.cos(2*np.pi*xvec)
+
+    
+    u_exact = np.cos(k*xvec)*np.cos(c*k*T)
     return u_exact
 
 def l2_norm(vec, h):
@@ -141,8 +124,10 @@ def l2_norm(vec, h):
 def compute_error(u, u_exact, hx):
     """Compute discrete l2 error"""
     error_vec = u - u_exact
-    relative_l2_error = l2_norm(error_vec, hx)/l2_norm(u_exact, hx)
-    return relative_l2_error
+    # relative_l2_error = l2_norm(error_vec, hx)/l2_norm(u_exact, hx)
+    # return relative_l2_error
+    error = l2_norm(error_vec,hx)
+    return error
 
 def plot_final_solution(u, u_exact, xvec, T):
     fig, ax = plt.subplots()
@@ -155,13 +140,19 @@ def plot_final_solution(u, u_exact, xvec, T):
     plt.show()
 
 def main():
-    m = 100   # Number of grid points, integer > 15.
-    order = 2  # Order of accuracy. 2, 4, 6, 8, 10, or 12.
-    u, T, xvec, hx, L, c = run_simulation(m, order)
-    u_exact = exact_solution(T, xvec, L, c)
-    error = compute_error(u[0], u_exact, hx)
-    print(f'L2-error: {error:.2e}')
-    plot_final_solution(u[0], u_exact, xvec, T)
+    # ms = [25,50,100,200,400]
+    ms = [200]
+    errors = []
+    for m in ms:
+        order = 2  # Order of accuracy. 2, 4, 6, 8, 10, or 12.
+        u, T, xvec, hx, L, c = run_simulation(m,show_animation=False)
+        u_exact = exact_solution(T, xvec, L, c)
+        error = compute_error(u[0], u_exact, hx)
+        errors.append(error)
+        print(f'L2-error m={m}: {error:.2e}')
+        plot_final_solution(u[0], u_exact, xvec, T)
+    # plt.plot(np.log10(ms),np.log10(errors))
+    plt.show()
 
 if __name__ == '__main__':
     main()    
