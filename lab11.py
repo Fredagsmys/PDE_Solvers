@@ -116,19 +116,26 @@ def plot_final_solution(u, u_exact, xvec, T):
     plt.show()
 
 def main():
-    ms = [25,50,100,200,400]
+    ms = np.array([25,50,100,200,400])
     # ms = [200]
-    errors = []
-    methods = [ops.sbp_cent_2nd, ops.sbp_cent_4th, ops.sbp_cent_6th]
-    for meth in methods:
+    
+    methods = np.array([ops.sbp_cent_2nd, ops.sbp_cent_4th, ops.sbp_cent_6th])
+    errors = np.array([methods.shape,ms.shape])
+    print(errors)
+    for i,meth in enumerate(methods):
+        errs = []
         for m in ms:
             u, T, xvec, hx, L, c = run_simulation(m,show_animation=False,method=meth)
             u_exact = exact_solution(T, xvec, L, c)
             error = compute_error(u[0], u_exact, hx)
-            errors.append(error)
+            errs.append(error)
             print(f'order :{str(meth)}, L2-error m={m}: {error:.2e}')
-        plt.plot(np.log10(ms),np.log10(errors))
-        plt.show()
+        errors[i] = errs
+    plt.plot(np.log10(ms),np.log10(errors))
+    # print(errors)
+    plt.show()
+    # plt.savefig('meth')
+    print(errors)
 
 if __name__ == '__main__':
     main()    
