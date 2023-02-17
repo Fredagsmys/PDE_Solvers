@@ -47,7 +47,7 @@ def run_simulation(mx=100, method=ops.sbp_cent_6th, show_animation=True):
         # print(res)
         return res
     # Time discretization
-    ht_try = 0.1*hx/c
+    ht_try = 0.01*hx/c
     mt = int(np.ceil(T/ht_try)) # round up so that (mt-1)*ht = T
     tvec, ht = np.linspace(0, T, mt, retstep=True)
 
@@ -100,10 +100,10 @@ def l2_norm(vec, h):
 def compute_error(u, u_exact, hx):
     """Compute discrete l2 error"""
     error_vec = u - u_exact
-    # relative_l2_error = l2_norm(error_vec, hx)/l2_norm(u_exact, hx)
-    # return relative_l2_error
-    error = l2_norm(error_vec,hx)
-    return error
+    relative_l2_error = l2_norm(error_vec, hx)/l2_norm(u_exact, hx)
+    return relative_l2_error
+    # error = l2_norm(error_vec,hx)
+    # return error
 
 def plot_final_solution(u, u_exact, xvec, T):
     fig, ax = plt.subplots()
@@ -120,23 +120,25 @@ def main():
     # ms = [200]
     
     methods = np.array([ops.sbp_cent_2nd, ops.sbp_cent_4th, ops.sbp_cent_6th])
-    errors = np.empty((3,5))
+    errors = np.empty((methods.shape[0],ms.shape[0]))
+    
     
     print(errors)
     for i,meth in enumerate(methods):
-        errs = []
         for j,m in enumerate(ms):
-            u, T, xvec, hx, L, c = run_simulation(m,show_animation=False,method=meth)
+            u, T, xvec, hx, L, c = run_simulation(mx=m, show_animation=False, method=meth)
             u_exact = exact_solution(T, xvec, L, c)
             error = compute_error(u[0], u_exact, hx)
             errors[i][j] = error
             print(f'order :{str(meth)}, L2-error m={m}: {error:.2e}')
-        # errors[i] = errs
-    plt.plot(np.log10(ms),np.log10(errors[0]))
-    plt.plot(np.log10(ms),np.log10(errors[1]))
-    plt.plot(np.log10(ms),np.log10(errors[2]))
-    print()
-    # print(errors)
+    # plt.plot(np.log10(ms), np.log10(errors[0]))
+    # plt.plot(np.log10(ms), np.log10(errors[1]))
+    # plt.plot(np.log10(ms), np.log10(errors[2]))
+    plt.plot(ms, errors[0])
+    plt.plot(ms, errors[1])
+    plt.plot(ms, errors[2])
+
+    print(errors)
     plt.show()
     plt.savefig('meth.png')
     print(errors)
