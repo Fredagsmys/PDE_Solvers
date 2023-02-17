@@ -125,17 +125,20 @@ def main():
     print(errors)
     for i,meth in enumerate(methods):
         errs = []
-        for m in ms:
+        for j,m in enumerate(ms):
             u, T, xvec, hx, L, c = run_simulation(m,show_animation=False,method=meth)
             u_exact = exact_solution(T, xvec, L, c)
             error = compute_error(u[0], u_exact, hx)
-            errs.append(error)
+            errors[i][j] = error
             print(f'order :{str(meth)}, L2-error m={m}: {error:.2e}')
-        errors[i] = errs
-    plt.plot(np.log10(ms),np.log10(errors))
+        # errors[i] = errs
+    plt.plot(np.log10(ms),np.log10(errors[0]))
+    plt.plot(np.log10(ms),np.log10(errors[1]))
+    plt.plot(np.log10(ms),np.log10(errors[2]))
+    print()
     # print(errors)
     plt.show()
-    # plt.savefig('meth')
+    plt.savefig('meth.png')
     print(errors)
 
 if __name__ == '__main__':
