@@ -120,7 +120,8 @@ def main():
     # ms = [200]
     
     methods = np.array([ops.sbp_cent_2nd, ops.sbp_cent_4th, ops.sbp_cent_6th])
-    errors = np.array([methods.shape,ms.shape])
+    errors = np.empty((3,5))
+    
     print(errors)
     for i,meth in enumerate(methods):
         errs = []
