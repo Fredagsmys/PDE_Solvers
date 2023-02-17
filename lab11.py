@@ -8,31 +8,7 @@ import matplotlib.pyplot as plt
 import time
 import rungekutta4 as rk4
 
-######################################################################################
-##                                                                                  ##
-##  Lab "Introduction to Finite Difference Methods", part 1, for course             ##
-##  "Scientific computing for PDEs" at Uppsala University.                          ##
-##                                                                                  ##
-##  Author: Gustav Eriksson                                                         ##
-##  Date:   2022-08-31                                                              ##
-##  Updated by Martin Almquist, January 2023.                                       ##
-##  Based on Matlab code written by Ken Mattsson in June 2022.                      ##
-##                                                                                  ##
-##  Solves the first order wave equation u_t + c u_x = 0 with periodic boundary     ##
-##  conditions using summation-by-parts finite differences. Illustrates dispersion  ##
-##  errors for different orders of accuracy.                                        ##
-##                                                                                  ##
-##  The code has been tested on the following versions:                             ##
-##  - Python     3.9.2                                                              ##
-##  - Numpy      1.19.5                                                             ##
-##  - Scipy      1.7.0                                                              ##
-##  - Matplotlib 3.3.4                                                              ##
-##                                                                                  ##
-######################################################################################
 
-# Initial data
-def f(x):
-    return np.exp(-((x - 0.5)/0.05)**2)
 # Model parameters
 c = 3 # wave speed
 T = np.pi # end time
@@ -51,7 +27,7 @@ def run_simulation(mx=100, method=ops.sbp_cent_6th, show_animation=True):
     order:  Order of accuracy, 2, 4, 6, 8, 10 or 12
     """
     # Space discretization
-    hx = (xr - xl)/mx
+    hx = (xr - xl)/(mx-1)
     xvec = np.linspace(xl, xr-hx, mx) # periodic, u(xl) = u(xr)
     # _, _, D1 = ops.periodic_expl(mx, hx, order)
     H,HI,D1,D2,e_l,e_r,d1_l,d1_r = method(mx,hx)
@@ -61,9 +37,9 @@ def run_simulation(mx=100, method=ops.sbp_cent_6th, show_animation=True):
     e_r = np.array(e_r.toarray())
     d1_l = np.array(d1_l.toarray())
     d1_r = np.array(d1_r.toarray())
-    H = np.array(H.toarray())
+    HI = np.array(HI.toarray())
     D2 = np.array(D2.toarray())
-    D = c**2*D2 + tauL*np.linalg.inv(H)@e_l.T@d1_l + tauR*np.linalg.inv(H)@e_r.T@d1_r
+    D = c**2*D2 + tauL*HI@e_l.T@d1_l + tauR*HI@e_r.T@d1_r
 
     # Define right-hand-side function
     def rhs(u):
@@ -72,7 +48,7 @@ def run_simulation(mx=100, method=ops.sbp_cent_6th, show_animation=True):
         return res
     # Time discretization
     ht_try = 0.1*hx/c
-    mt = int(np.ceil(T/ht_try) + 1) # round up so that (mt-1)*ht = T
+    mt = int(np.ceil(T/ht_try)) # round up so that (mt-1)*ht = T
     tvec, ht = np.linspace(0, T, mt, retstep=True)
 
     # Initialize time variable and solution vector
@@ -140,19 +116,19 @@ def plot_final_solution(u, u_exact, xvec, T):
     plt.show()
 
 def main():
-    # ms = [25,50,100,200,400]
-    ms = [200]
+    ms = [25,50,100,200,400]
+    # ms = [200]
     errors = []
-    for m in ms:
-        order = 2  # Order of accuracy. 2, 4, 6, 8, 10, or 12.
-        u, T, xvec, hx, L, c = run_simulation(m,show_animation=False)
-        u_exact = exact_solution(T, xvec, L, c)
-        error = compute_error(u[0], u_exact, hx)
-        errors.append(error)
-        print(f'L2-error m={m}: {error:.2e}')
-        plot_final_solution(u[0], u_exact, xvec, T)
-    # plt.plot(np.log10(ms),np.log10(errors))
-    plt.show()
+    methods = [ops.sbp_cent_2nd, ops.sbp_cent_4th, ops.sbp_cent_6th]
+    for meth in methods:
+        for m in ms:
+            u, T, xvec, hx, L, c = run_simulation(m,show_animation=False,method=meth)
+            u_exact = exact_solution(T, xvec, L, c)
+            error = compute_error(u[0], u_exact, hx)
+            errors.append(error)
+            print(f'order :{str(meth)}, L2-error m={m}: {error:.2e}')
+        plt.plot(np.log10(ms),np.log10(errors))
+        plt.show()
 
 if __name__ == '__main__':
     main()    
