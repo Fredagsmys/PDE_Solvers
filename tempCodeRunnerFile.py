@@ -1,4 +1,2 @@
-
-    # print(Dxx[0].shape)
-    # print(Dxx[0][0].shape)
-    # print(np.reshape(Dxx,(20000,20000)))
+ax.contour3D(X, Y, u, 50, cmap='binary')
+    plt.show()

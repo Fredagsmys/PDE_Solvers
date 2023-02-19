@@ -48,7 +48,12 @@ def run_simulation(mx, my, show_animation=True):
     H,HIx,D1,D2x,e_lx,e_rx,d1_lx,d1_rx = ops.sbp_cent_6th(mx,hx)
     H,HIy,D1,D2y,e_ly,e_ry,d1_ly,d1_ry = ops.sbp_cent_6th(my,hy)
     # print(D2x[125])
-    D = kron(eyey,D2x) + kron(D2y,eyex)   
+    c = 3
+    tauL = c**2
+    tauR = -c**2
+    D2xx = c**2*D2x + tauL*HIx@e_lx.T@d1_lx + tauR*HIx@e_rx.T@d1_rx
+    D2yy = c**2*D2y + tauR*HIy@e_ly.T@d1_ly + tauR*HIy@e_ry.T@d1_ry
+    D = kron(eyey,D2xx) + kron(D2yy,eyex) 
 
     # Define right-hand-side function
     def rhs(u):
@@ -68,7 +73,7 @@ def run_simulation(mx, my, show_animation=True):
     u_t = np.zeros((mx*my))
     for y in range(my):
         for x in range(mx):
-            print(hx*x-1)
+            # print(hx*x-1)
         
             u[y*mx + x] = np.exp((-(hx*x-1)**2-(hy*y-1/2)**2)/0.05**2)
     
@@ -125,7 +130,7 @@ def compute_error(u, u_exact, hx):
 
 def plot_final_solution(u, u_exact, X, Y, T):
     ax = plt.axes(projection='3d')
-    ax.contour3D(X, Y, u, 50, cmap='binary')
+    ax.contour3D(X, Y, u, 50, cmap="rainbow")
     plt.show()
     
 
@@ -138,10 +143,6 @@ def main():
     u, T, X, Y, hx, hy, L, c = run_simulation(mx=mx, my=my, show_animation=False)  
     solution = np.reshape(u[0],(mx,my))
     plot_final_solution(solution,0,X,Y,0)
-    print(u[0])
-    print(u[0].shape)
-    print(X.shape)
-    print(Y.shape)
 
 
 if __name__ == '__main__':
