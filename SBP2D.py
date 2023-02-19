@@ -4,9 +4,11 @@ import scipy.linalg as splg
 import scipy.sparse as spsp
 
 import operators as ops
+from mpl_toolkits import mplot3d
 import matplotlib.pyplot as plt
 import time
 import rungekutta4 as rk4
+
 
 
 # Model parameters
@@ -41,8 +43,8 @@ def run_simulation(mx, my, show_animation=True):
     H,HIx,D1,D2x,e_lx,e_rx,d1_lx,d1_rx = ops.sbp_cent_6th(mx,hx)
     H,HIy,D1,D2y,e_ly,e_ry,d1_ly,d1_ry = ops.sbp_cent_6th(my,hy)
 
-    D = np.kron(eyey,D2x) + np.kron(D2y,eyex)   
-
+    D = spsp.kron(eyey,D2x) + spsp.kron(D2y,eyex)   
+    
     # Define right-hand-side function
     def rhs(u):
         HL = np.array([u[1],D@u[0]])
@@ -128,10 +130,15 @@ def plot_final_solution(u, u_exact, xvec, T):
 def main():
     mx = 200
     my = 100
-    fig = plt.figure()
-    ax = plt.axes(projection='3d') 
+    
     u, T, xvec, yvec, hx, hy, L, c = run_simulation(mx=mx, my=my, show_animation=False)
-
+    print(xvec.shape)
+    print(yvec.shape)
+    print(u[0].reshape(2,10000).shape)
+    fig = plt.figure()
+    ax = plt.axes(projection='3d')
+    ax.plot3D(xvec,yvec,u[0].reshape(2,10000))
+    plt.show()
     
     
 

@@ -44,6 +44,7 @@ def run_simulation(mx, method, show_animation=True):
     # Define right-hand-side function
     def rhs(u):
         res = np.array([u[1],D@u[0]])
+        #w_t = A*w
         # print(res)
         return res
     # Time discretization
@@ -123,7 +124,7 @@ def main():
     
     for i,meth in enumerate(methods):
         for j,m in enumerate(ms):
-            u, T, xvec, hx, L, c = run_simulation(mx=m, show_animation=False, method=meth)
+            u, T, xvec, hx, L, c = run_simulation(mx=m, show_animation=True, method=meth)
             u_exact = exact_solution(T, xvec, L, c)
             error = compute_error(u[0], u_exact, hx)
             errors[i][j] = error
