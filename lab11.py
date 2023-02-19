@@ -29,7 +29,7 @@ def run_simulation(mx, method, show_animation=True):
     # Space discretization
     hx = (xr - xl)/(mx-1)
     xvec = np.linspace(xl, xr, mx) # periodic, u(xl) = u(xr)
-    xvec = xvec.reshape(mx,1)
+    # xvec = xvec.reshape(mx,1)
     # _, _, D1 = ops.periodic_expl(mx, hx, order)
     H,HI,D1,D2,e_l,e_r,d1_l,d1_r = method(mx,hx)
 
@@ -49,8 +49,8 @@ def run_simulation(mx, method, show_animation=True):
         # print(res)
         return res
     # Time discretization
-    ht_try = 0.1*hx
-    mt = int(np.ceil(T/ht_try)) # round up so that (mt-1)*ht = T
+    ht_try = 0.1*hx/c
+    mt = int(np.ceil(T/ht_try)+1) # round up so that (mt-1)*ht = T
     tvec, ht = np.linspace(0, T, mt, retstep=True)
 
     # Initialize time variable and solution vector
@@ -70,7 +70,7 @@ def run_simulation(mx, method, show_animation=True):
         plt.pause(1)
 
     # Loop over all time steps
-    for tidx in range(mt):
+    for tidx in range(mt-1):
 
         # Take one step with the fourth order Runge-Kutta method.
         w, t = rk4.step(rhs, w, t, ht)
@@ -111,7 +111,6 @@ def plot_final_solution(u, u_exact, xvec, T):
     ax.set_xlim([xvec[0], xvec[-1]])
     ax.set_ylim([-1, 1.2])
     plt.title(f't = {T:.2f}')
-    plt.grid(visible=True)
     plt.legend()
     plt.show()
 
