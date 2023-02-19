@@ -2,18 +2,18 @@ import numpy as np
 import scipy.sparse.linalg as spsplg
 import scipy.linalg as splg
 import scipy.sparse as spsp
+from scipy.sparse import kron, csc_matrix, eye, vstack, bmat
+from mpl_toolkits.mplot3d import Axes3D
 
 import operators as ops
-from mpl_toolkits import mplot3d
 import matplotlib.pyplot as plt
 import time
 import rungekutta4 as rk4
-
-
-
+import pylab
+from matplotlib import cm
 # Model parameters
 c = 3 # wave speed
-T = np.pi # end time
+T = 3 # end time
 xl = -1 # left boundary
 xr = 1 # right boundary
 yl = -1/2
@@ -35,16 +35,21 @@ def run_simulation(mx, my, show_animation=True):
     
     eyex = np.identity(mx)
     eyey = np.identity(my)
-
+    
     xvec = np.linspace(xl, xr-hx, mx)
     yvec = np.linspace(yl, yr-hy, my)
-
+    X,Y = np.meshgrid(yvec,xvec)
+    fig = plt.figure()
+    ax = plt.axes(projection='3d')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
     # _, _, D1 = ops.periodic_expl(mx, hx, order)
     H,HIx,D1,D2x,e_lx,e_rx,d1_lx,d1_rx = ops.sbp_cent_6th(mx,hx)
     H,HIy,D1,D2y,e_ly,e_ry,d1_ly,d1_ry = ops.sbp_cent_6th(my,hy)
+    print(D2x[125])
+    D = kron(eyey,D2x) + kron(D2y,eyex)   
 
-    D = spsp.kron(eyey,D2x) + spsp.kron(D2y,eyex)   
-    
     # Define right-hand-side function
     def rhs(u):
         HL = np.array([u[1],D@u[0]])
@@ -71,14 +76,8 @@ def run_simulation(mx, my, show_animation=True):
 
     # Initialize plot for animation
     if show_animation:
-        fig, ax = plt.subplots()
-        [line] = ax.plot(xvec, w[0], label='Approximation')
-        ax.set_xlim([xl, xr-hx])
-        ax.set_ylim([-1, 1.2])
-        title = plt.title(f't = {0:.2f}')
-        plt.draw()
-        plt.pause(1)
-
+        
+        plt.show()
     # Loop over all time steps
     for tidx in range(mt):
 
@@ -86,8 +85,13 @@ def run_simulation(mx, my, show_animation=True):
         w, t = rk4.step(rhs, w, t, ht)
         # Update plot every 50th time step
         if tidx % 1 == 0 and show_animation: 
-            line.set_ydata(w[0])
-            title.set_text(f't = {t:.2f}')
+            solution = np.reshape(w[0],(mx,my))
+            ax.contour3D(X, Y, solution, 50, cmap='binary')
+            
+            ax.set_title(t)
+            print(t)
+            #line.set_ydata(w[0])
+            #title.set_text(f't = {t:.2f}')
             plt.draw()
             plt.pause(1e-8)
 
@@ -95,7 +99,7 @@ def run_simulation(mx, my, show_animation=True):
     if show_animation:
         plt.close()
 
-    return w, T, xvec, yvec, hx, hy, L, c
+    return w, T, X, Y, hx, hy, L, c
 
 def exact_solution(t, xvec, L, c):
     # T1 = L/c  # Time for one lap
@@ -117,33 +121,25 @@ def compute_error(u, u_exact, hx):
     # error = l2_norm(error_vec,hx)
     # return error
 
-def plot_final_solution(u, u_exact, xvec, T):
-    fig, ax = plt.subplots()
-    ax.plot(xvec, u, label='Approximation')
-    plt.plot(xvec, u_exact, 'r--', label='Exact')
-    ax.set_xlim([xvec[0], xvec[-1]])
-    ax.set_ylim([-1, 1.2])
-    plt.title(f't = {T:.2f}')
-    plt.legend()
+def plot_final_solution(u, u_exact, X, Y, T):
+    ax = plt.axes(projection='3d')
+    ax.contour3D(X, Y, u, 50, cmap='binary')
     plt.show()
+    
+
+
+
 
 def main():
     mx = 200
     my = 100
-    
-    u, T, xvec, yvec, hx, hy, L, c = run_simulation(mx=mx, my=my, show_animation=False)
-    print(xvec.shape)
-    print(yvec.shape)
-    print(u[0].reshape(2,10000).shape)
-    fig = plt.figure()
-    ax = plt.axes(projection='3d')
-    ax.plot3D(xvec,yvec,u[0].reshape(2,10000))
-    plt.show()
-    
-    
+    u, T, X, Y, hx, hy, L, c = run_simulation(mx=mx, my=my, show_animation=True)  
+    solution = np.reshape(u[0],(mx,my))
+    # plot_final_solution(solution,0,X,Y,0)
+    print(u[0].shape)
+    print(X.shape)
+    print(Y.shape)
 
-    plt.savefig('meth.png')
-    plt.show()
 
-if __name__ == '__main__':
-    main()    
+if __name__ == '_main_':
+    main()

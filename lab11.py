@@ -113,28 +113,34 @@ def plot_final_solution(u, u_exact, xvec, T):
     ax.set_xlim([xvec[0], xvec[-1]])
     ax.set_ylim([-1, 1.2])
     plt.title(f't = {T:.2f}')
+    plt.grid(visible=True)
     plt.legend()
     plt.show()
 
 def main():
-    ms = np.array([25,50,100,200,400])
-    
+    ms = np.array([25,50,100,200])
+    hs = (xr - xl)/(ms-1)
+    print(hs)
+    # ms = np.array([800])
     methods = np.array([ops.sbp_cent_2nd, ops.sbp_cent_4th, ops.sbp_cent_6th])
+    # methods = np.array([ops.sbp_cent_6th])
     errors = np.empty((methods.shape[0],ms.shape[0]))
     
     for i,meth in enumerate(methods):
         for j,m in enumerate(ms):
-            u, T, xvec, hx, L, c = run_simulation(mx=m, show_animation=True, method=meth)
+            u, T, xvec, hx, L, c = run_simulation(mx=m, show_animation=False, method=meth)
             u_exact = exact_solution(T, xvec, L, c)
             error = compute_error(u[0], u_exact, hx)
             errors[i][j] = error
             print(f'SBP order :{str((1+i)*2)}, L2-error m={m}: {error:.2e}')
             # plot_final_solution(u[0], u_exact, xvec, T)
-    plt.plot(np.log10(ms), np.log10(errors[0]),'*')
-    plt.plot(np.log10(ms), np.log10(errors[1]),'-')
-    plt.plot(np.log10(ms), np.log10(errors[2]),'o')
-
+    plt.loglog(hs,errors[0])
+    plt.loglog(hs,errors[1])
+    plt.loglog(hs,errors[2])
     print(errors)
+    plt.grid(visible=True)
+    plt.xlabel('grid spacing')
+    plt.ylabel('l2 error')
     plt.savefig('meth.png')
     plt.show()
     print(errors)
