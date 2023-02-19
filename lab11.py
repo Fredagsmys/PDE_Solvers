@@ -19,21 +19,12 @@ k = 2*np.pi
 tauL = c**2
 tauR = -c**2
 def run_simulation(mx, method, show_animation=True):
-    """Solves the advection equation using finite differences
-    and Runge-Kutta 4.
-    
-    Method parameters: 
-    mx:     Number of grid points, integer > 15.
-    order:  Order of accuracy, 2, 4, 6, 8, 10 or 12
-    """
+
     # Space discretization
     hx = (xr - xl)/(mx-1)
-    xvec = np.linspace(xl, xr, mx) # periodic, u(xl) = u(xr)
-    # xvec = xvec.reshape(mx,1)
-    # _, _, D1 = ops.periodic_expl(mx, hx, order)
+    xvec = np.linspace(xl, xr, mx)
     H,HI,D1,D2,e_l,e_r,d1_l,d1_r = method(mx,hx)
 
-    # print(f"e_l{np.array(e_l.toarray()[0])}")
     e_l = np.array(e_l.toarray())
     e_r = np.array(e_r.toarray())
     d1_l = np.array(d1_l.toarray())
@@ -45,8 +36,7 @@ def run_simulation(mx, method, show_animation=True):
     # Define right-hand-side function
     def rhs(u):
         res = np.array([u[1],D.astype(float)@u[0].astype(float)])
-        #w_t = A*w
-        # print(res)
+        # structure: w_t = A*w
         return res
     # Time discretization
     ht_try = 0.1*hx/c
@@ -98,11 +88,8 @@ def l2_norm(vec, h):
 def compute_error(u, u_exact, hx):
     """Compute discrete l2 error"""
     error_vec = u - u_exact
-    # relative_l2_error = l2_norm(error_vec, hx)/l2_norm(u_exact, hx)
     error = l2_norm(error_vec,hx)
     return error 
-    # error = l2_norm(error_vec,hx)
-    # return error
 
 def plot_final_solution(u, u_exact, xvec, T):
     fig, ax = plt.subplots()
@@ -115,12 +102,10 @@ def plot_final_solution(u, u_exact, xvec, T):
     plt.show()
 
 def main():
-    ms = np.array([25,50,100,200])
+    ms = np.array([25, 50, 100, 200])
     hs = (xr - xl)/(ms-1)
     
-    # ms = np.array([800])
     methods = np.array([ops.sbp_cent_2nd, ops.sbp_cent_4th, ops.sbp_cent_6th])
-    # methods = np.array([ops.sbp_cent_6th])
     errors = np.empty((methods.shape[0],ms.shape[0]))
     tstart = time()
     for i,meth in enumerate(methods):

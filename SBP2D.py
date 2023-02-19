@@ -10,31 +10,22 @@ import operators as ops
 import matplotlib.pyplot as plt
 import time
 import rungekutta4 as rk4
-import pylab
 from matplotlib import cm
 from time import time
-# Model parameters
 c = 1 # wave speed
 T = 3 # end time
 xl = -1 # left boundary
 xr = 1 # right boundary
 yl = -1/2
 yr = 1/2
-
-L = xr - xl # domain length
+Lx = xr - xl # domain length
+Ly = yr - yl
 k = 2*np.pi
 def run_simulation(mx, my, show_animation=True):
-    """Solves the advection equation using finite differences
-    and Runge-Kutta 4.
-    
-    Method parameters: 
-    mx:     Number of grid points, integer > 15.
-    order:  Order of accuracy, 2, 4, 6, 8, 10 or 12
-    """
     
     # Space discretization
-    hx = (xr - xl)/(mx-1)
-    hy = (yr - yl)/(my-1)
+    hx = Lx/(mx-1)
+    hy = Ly/(my-1)
     
     eyex = np.identity(mx)
     eyey = np.identity(my)
@@ -47,23 +38,8 @@ def run_simulation(mx, my, show_animation=True):
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.set_zlabel('z')
-    # _, _, D1 = ops.periodic_expl(mx, hx, order)
     H,HIx,D1,D2x,e_lx,e_rx,d1_lx,d1_rx = ops.sbp_cent_6th(mx,hx)
     H,HIy,D1,D2y,e_ly,e_ry,d1_ly,d1_ry = ops.sbp_cent_6th(my,hy)
-
-    e_lx = np.array(e_lx.toarray())
-    e_rx = np.array(e_rx.toarray())
-    d1_lx = np.array(d1_lx.toarray())
-    d1_rx = np.array(d1_rx.toarray())
-    HIx = np.array(HIx.toarray())
-    D2x = np.array(D2x.toarray())
-
-    e_ly = np.array(e_ly.toarray())
-    e_ry = np.array(e_ry.toarray())
-    d1_ly = np.array(d1_ly.toarray())
-    d1_ry = np.array(d1_ry.toarray())
-    HIy = np.array(HIy.toarray())
-    D2y = np.array(D2y.toarray())
 
     c = 1
     tauL = c**2
@@ -71,7 +47,7 @@ def run_simulation(mx, my, show_animation=True):
 
     D2xx = c**2*D2x + tauL*HIx@e_lx.T@d1_lx + tauR*HIx@e_rx.T@d1_rx
     D2yy = c**2*D2y + tauL*HIy@e_ly.T@d1_ly + tauR*HIy@e_ry.T@d1_ry
-    #print(D2xx)
+    
     D = kron(eyey,D2xx) + kron(D2yy,eyex) 
 
     # Define right-hand-side function
@@ -100,7 +76,6 @@ def run_simulation(mx, my, show_animation=True):
     # Initialize plot for animation
     if show_animation:
         ax = plt.axes(projection='3d')
-        # plt.show()
     # Loop over all time steps
     for tidx in range(mt):
 
@@ -115,8 +90,6 @@ def run_simulation(mx, my, show_animation=True):
             ax.set_xlim(-1,1)
             ax.set_ylim(-1/2,1/2)
             ax.set_zlim(0,1.1)
-            # plt.show()
-            # plt.draw()
             plt.pause(1e-8)
             
     # Close figure window
@@ -125,22 +98,7 @@ def run_simulation(mx, my, show_animation=True):
 
     return w, T, X, Y, hx, hy, L, c
 
-def exact_solution(t, xvec, L, c):
-    u_exact = np.cos(k*xvec)*np.cos(c*k*T)
-    return u_exact
-
-def l2_norm(vec, h):
-    return np.sqrt(h)*np.sqrt(np.sum(vec**2))
-
-def compute_error(u, u_exact, hx):
-    """Compute discrete l2 error"""
-    error_vec = u - u_exact
-    relative_l2_error = l2_norm(error_vec, hx)/l2_norm(u_exact, hx)
-    return relative_l2_error
-    # error = l2_norm(error_vec,hx)
-    # return error
-
-def plot_final_solution(u, u_exact, X, Y, T):
+def plot_final_solution(u, X, Y, T):
     ax = plt.axes(projection='3d')
     ax.set_ylim(-1/2,1/2)
     ax.set_xlim(-1,1)
@@ -148,10 +106,6 @@ def plot_final_solution(u, u_exact, X, Y, T):
     ax.contour3D(X, Y, u, 100, cmap="rainbow")
     plt.show()
     
-
-
-
-
 def main():
     mx = 200
     my = 100
