@@ -7,7 +7,7 @@ import operators as ops
 import matplotlib.pyplot as plt
 import time
 import rungekutta4 as rk4
-
+from time import time
 
 # Model parameters
 c = 3 # wave speed
@@ -122,7 +122,7 @@ def main():
     methods = np.array([ops.sbp_cent_2nd, ops.sbp_cent_4th, ops.sbp_cent_6th])
     # methods = np.array([ops.sbp_cent_6th])
     errors = np.empty((methods.shape[0],ms.shape[0]))
-    
+    tstart = time()
     for i,meth in enumerate(methods):
         for j,m in enumerate(ms):
             u, T, xvec, hx, L, c = run_simulation(mx=m, show_animation=False, method=meth)
@@ -131,6 +131,8 @@ def main():
             errors[i][j] = error
             print(f'SBP order :{str((1+i)*2)}, L2-error m={m}: {error:.2e}')
             # plot_final_solution(u[0], u_exact, xvec, T)
+    tend = time()
+    print(tend-tstart)
     plt.loglog(hs,errors[0],label="Order 2")
     plt.loglog(hs,errors[1],label="Order 4")
     plt.loglog(hs,errors[2],label="Order 6")

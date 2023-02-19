@@ -11,6 +11,7 @@ import time
 import rungekutta4 as rk4
 import pylab
 from matplotlib import cm
+from time import time
 # Model parameters
 c = 3 # wave speed
 T = 3 # end time
@@ -29,6 +30,7 @@ def run_simulation(mx, my, show_animation=True):
     mx:     Number of grid points, integer > 15.
     order:  Order of accuracy, 2, 4, 6, 8, 10 or 12
     """
+    
     # Space discretization
     hx = (xr - xl)/(mx-1)
     hy = (yr - yl)/(my-1)
@@ -36,8 +38,8 @@ def run_simulation(mx, my, show_animation=True):
     eyex = np.identity(mx)
     eyey = np.identity(my)
     
-    xvec = np.linspace(xl, xr-hx, mx)
-    yvec = np.linspace(yl, yr-hy, my)
+    xvec = np.linspace(xl, xr, mx)
+    yvec = np.linspace(yl, yr, my)
     X,Y = np.meshgrid(yvec,xvec)
     fig = plt.figure()
     ax = plt.axes(projection='3d')
@@ -62,11 +64,6 @@ def run_simulation(mx, my, show_animation=True):
     HIy = np.array(HIy.toarray())
     D2y = np.array(D2y.toarray())
 
-
-    D2xx = D2x
-    D2yy = D2y
-    print(D2xx)
-    print(D2yy)
     c = 3
     tauL = c**2
     tauR = -c**2
@@ -93,32 +90,30 @@ def run_simulation(mx, my, show_animation=True):
     u = np.zeros((mx*my))
     u_t = np.zeros((mx*my))
     for y in range(my):
-        for x in range(mx):        
+        for x in range(mx):
             u[y*mx + x] = np.exp((-(hx*x-1)**2-(hy*y-1/2)**2)/0.05**2)
     
     w = np.array([u,u_t])
-    print(u)
-
+    
     # Initialize plot for animation
     if show_animation:
-        plt.show()
+        ax = plt.axes(projection='3d')
+        # plt.show()
     # Loop over all time steps
     for tidx in range(mt):
 
         # Take one step with the fourth order Runge-Kutta method.
         w, t = rk4.step(rhs, w, t, ht)
         # Update plot every 50th time step
-        if tidx % 1 == 0 and show_animation: 
+        if tidx % 50 == 0 and show_animation: 
             solution = np.reshape(w[0],(mx,my))
-            ax.contour3D(X, Y, solution, 100, cmap='binary')
             
+            ax.contour3D(X, Y, solution, 100, cmap='binary')
             ax.set_title(t)
-            # print(t)
-            #line.set_ydata(w[0])
-            #title.set_text(f't = {t:.2f}')
-            plt.draw()
+            # plt.show()
+            # plt.draw()
             plt.pause(1e-8)
-
+            
     # Close figure window
     if show_animation:
         plt.close()
@@ -126,11 +121,6 @@ def run_simulation(mx, my, show_animation=True):
     return w, T, X, Y, hx, hy, L, c
 
 def exact_solution(t, xvec, L, c):
-    # T1 = L/c  # Time for one lap
-    # t_eff = (t/T1 - np.floor(t/T1))*T1  # "Effective" time, using periodicity
-    # u_exact = f(xvec - c*t_eff)
-
-    
     u_exact = np.cos(k*xvec)*np.cos(c*k*T)
     return u_exact
 
@@ -157,8 +147,10 @@ def plot_final_solution(u, u_exact, X, Y, T):
 def main():
     mx = 200
     my = 100
-    u, T, X, Y, hx, hy, L, c = run_simulation(mx=mx, my=my, show_animation=False)  
-    print(u[0])
+    tstart = time()
+    u, T, X, Y, hx, hy, L, c = run_simulation(mx=mx, my=my, show_animation=True)  
+    tend = time()
+    print(tend-tstart)
     solution = np.reshape(u[0],(mx,my))
     plot_final_solution(solution,0,X,Y,0)
 
