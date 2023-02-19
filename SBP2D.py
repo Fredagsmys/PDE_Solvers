@@ -47,6 +47,7 @@ def run_simulation(mx, my, show_animation=True):
     # _, _, D1 = ops.periodic_expl(mx, hx, order)
     H,HIx,D1,D2x,e_lx,e_rx,d1_lx,d1_rx = ops.sbp_cent_6th(mx,hx)
     H,HIy,D1,D2y,e_ly,e_ry,d1_ly,d1_ry = ops.sbp_cent_6th(my,hy)
+
     e_lx = np.array(e_lx.toarray())
     e_rx = np.array(e_rx.toarray())
     d1_lx = np.array(d1_lx.toarray())
@@ -61,11 +62,18 @@ def run_simulation(mx, my, show_animation=True):
     HIy = np.array(HIy.toarray())
     D2y = np.array(D2y.toarray())
 
+
+    D2xx = D2x
+    D2yy = D2y
+    print(D2xx)
+    print(D2yy)
     c = 3
     tauL = c**2
     tauR = -c**2
+
     D2xx = c**2*D2x + tauL*HIx@e_lx.T@d1_lx + tauR*HIx@e_rx.T@d1_rx
-    D2yy = c**2*D2y + tauR*HIy@e_ly.T@d1_ly + tauR*HIy@e_ry.T@d1_ry
+    D2yy = c**2*D2y + tauL*HIy@e_ly.T@d1_ly + tauR*HIy@e_ry.T@d1_ry
+    #print(D2xx)
     D = kron(eyey,D2xx) + kron(D2yy,eyex) 
 
     # Define right-hand-side function
@@ -89,6 +97,7 @@ def run_simulation(mx, my, show_animation=True):
             u[y*mx + x] = np.exp((-(hx*x-1)**2-(hy*y-1/2)**2)/0.05**2)
     
     w = np.array([u,u_t])
+    print(u)
 
     # Initialize plot for animation
     if show_animation:
@@ -101,7 +110,7 @@ def run_simulation(mx, my, show_animation=True):
         # Update plot every 50th time step
         if tidx % 1 == 0 and show_animation: 
             solution = np.reshape(w[0],(mx,my))
-            ax.contour3D(X, Y, solution, 50, cmap='binary')
+            ax.contour3D(X, Y, solution, 100, cmap='binary')
             
             ax.set_title(t)
             # print(t)
@@ -149,6 +158,7 @@ def main():
     mx = 200
     my = 100
     u, T, X, Y, hx, hy, L, c = run_simulation(mx=mx, my=my, show_animation=False)  
+    print(u[0])
     solution = np.reshape(u[0],(mx,my))
     plot_final_solution(solution,0,X,Y,0)
 
