@@ -74,7 +74,7 @@ def run_simulation(mx, method, show_animation=True):
 
         # Take one step with the fourth order Runge-Kutta method.
         w, t = rk4.step(rhs, w, t, ht)
-        if tidx % 1 == 0 and show_animation: 
+        if tidx % 5 == 0 and show_animation: 
             line.set_ydata(w[0])
             title.set_text(f't = {t:.2f}')
             plt.draw()
@@ -133,7 +133,7 @@ def main():
             # plot_final_solution(u[0], u_exact, xvec, T)
     tend = time()
     print(tend-tstart)
-    plt.loglog(hs,errors[0],label="Order 2")
+    plt.loglog(hs,errors[0],label="Order 2",)
     plt.loglog(hs,errors[1],label="Order 4")
     plt.loglog(hs,errors[2],label="Order 6")
     print(errors)

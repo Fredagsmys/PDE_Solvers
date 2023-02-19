@@ -13,7 +13,7 @@ import pylab
 from matplotlib import cm
 from time import time
 # Model parameters
-c = 3 # wave speed
+c = 1 # wave speed
 T = 3 # end time
 xl = -1 # left boundary
 xr = 1 # right boundary
@@ -40,7 +40,7 @@ def run_simulation(mx, my, show_animation=True):
     
     xvec = np.linspace(xl, xr, mx)
     yvec = np.linspace(yl, yr, my)
-    X,Y = np.meshgrid(yvec,xvec)
+    X,Y = np.meshgrid(xvec,yvec)
     fig = plt.figure()
     ax = plt.axes(projection='3d')
     ax.set_xlabel('x')
@@ -64,7 +64,7 @@ def run_simulation(mx, my, show_animation=True):
     HIy = np.array(HIy.toarray())
     D2y = np.array(D2y.toarray())
 
-    c = 3
+    c = 1
     tauL = c**2
     tauR = -c**2
 
@@ -105,11 +105,14 @@ def run_simulation(mx, my, show_animation=True):
         # Take one step with the fourth order Runge-Kutta method.
         w, t = rk4.step(rhs, w, t, ht)
         # Update plot every 50th time step
-        if tidx % 50 == 0 and show_animation: 
-            solution = np.reshape(w[0],(mx,my))
-            
-            ax.contour3D(X, Y, solution, 100, cmap='binary')
-            ax.set_title(t)
+        if tidx % 10 == 0 and show_animation: 
+            solution = np.reshape(w[0],(my,mx))
+            ax.clear()
+            ax.contour3D(X, Y, solution, 150, cmap='cool')
+            ax.set_title(f't = {t:.2f}')
+            ax.set_xlim(-1,1)
+            ax.set_ylim(-1/2,1/2)
+            ax.set_zlim(0,1.1)
             # plt.show()
             # plt.draw()
             plt.pause(1e-8)
@@ -137,7 +140,10 @@ def compute_error(u, u_exact, hx):
 
 def plot_final_solution(u, u_exact, X, Y, T):
     ax = plt.axes(projection='3d')
-    ax.contour3D(X, Y, u, 50, cmap="rainbow")
+    ax.set_ylim(-1/2,1/2)
+    ax.set_xlim(-1,1)
+    ax.set_zlim(0,1.1)
+    ax.contour3D(X, Y, u, 100, cmap="rainbow")
     plt.show()
     
 
@@ -151,7 +157,7 @@ def main():
     u, T, X, Y, hx, hy, L, c = run_simulation(mx=mx, my=my, show_animation=True)  
     tend = time()
     print(tend-tstart)
-    solution = np.reshape(u[0],(mx,my))
+    solution = np.reshape(u[0],(my,mx))
     plot_final_solution(solution,0,X,Y,0)
 
 
