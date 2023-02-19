@@ -47,7 +47,7 @@ def run_simulation(mx, my, show_animation=True):
     # _, _, D1 = ops.periodic_expl(mx, hx, order)
     H,HIx,D1,D2x,e_lx,e_rx,d1_lx,d1_rx = ops.sbp_cent_6th(mx,hx)
     H,HIy,D1,D2y,e_ly,e_ry,d1_ly,d1_ry = ops.sbp_cent_6th(my,hy)
-    print(D2x[125])
+    # print(D2x[125])
     D = kron(eyey,D2x) + kron(D2y,eyex)   
 
     # Define right-hand-side function
@@ -65,12 +65,14 @@ def run_simulation(mx, my, show_animation=True):
     t = 0
 
     u = np.zeros((mx*my))
-    u_t = u
+    u_t = np.zeros((mx*my))
     for y in range(my):
         for x in range(mx):
-            u[y*mx + x] = np.exp((-x**2-y**2)/0.05**2)
+            print(hx*x-1)
+        
+            u[y*mx + x] = np.exp((-(hx*x-1)**2-(hy*y-1/2)**2)/0.05**2)
     
-    
+    # print(u.tolist())
     
     w = np.array([u,u_t])
 
@@ -89,7 +91,7 @@ def run_simulation(mx, my, show_animation=True):
             ax.contour3D(X, Y, solution, 50, cmap='binary')
             
             ax.set_title(t)
-            print(t)
+            # print(t)
             #line.set_ydata(w[0])
             #title.set_text(f't = {t:.2f}')
             plt.draw()
@@ -133,13 +135,14 @@ def plot_final_solution(u, u_exact, X, Y, T):
 def main():
     mx = 200
     my = 100
-    u, T, X, Y, hx, hy, L, c = run_simulation(mx=mx, my=my, show_animation=True)  
+    u, T, X, Y, hx, hy, L, c = run_simulation(mx=mx, my=my, show_animation=False)  
     solution = np.reshape(u[0],(mx,my))
-    # plot_final_solution(solution,0,X,Y,0)
+    plot_final_solution(solution,0,X,Y,0)
+    print(u[0])
     print(u[0].shape)
     print(X.shape)
     print(Y.shape)
 
 
-if __name__ == '_main_':
+if __name__ == '__main__':
     main()

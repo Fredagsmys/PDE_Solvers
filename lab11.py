@@ -48,7 +48,7 @@ def run_simulation(mx, method, show_animation=True):
         # print(res)
         return res
     # Time discretization
-    ht_try = 0.1*hx/c
+    ht_try = 0.1*hx
     mt = int(np.ceil(T/ht_try)) # round up so that (mt-1)*ht = T
     tvec, ht = np.linspace(0, T, mt, retstep=True)
 
@@ -73,7 +73,6 @@ def run_simulation(mx, method, show_animation=True):
 
         # Take one step with the fourth order Runge-Kutta method.
         w, t = rk4.step(rhs, w, t, ht)
-        # Update plot every 50th time step
         if tidx % 1 == 0 and show_animation: 
             line.set_ydata(w[0])
             title.set_text(f't = {t:.2f}')
@@ -87,22 +86,21 @@ def run_simulation(mx, method, show_animation=True):
     return w, T, xvec, hx, L, c
 
 def exact_solution(t, xvec, L, c):
-    # T1 = L/c  # Time for one lap
-    # t_eff = (t/T1 - np.floor(t/T1))*T1  # "Effective" time, using periodicity
-    # u_exact = f(xvec - c*t_eff)
 
     
     u_exact = np.cos(k*xvec)*np.cos(c*k*T)
     return u_exact
 
-def l2_norm(vec, h):
+def l2_norm(vec, h): 
     return np.sqrt(h)*np.sqrt(np.sum(vec**2))
 
 def compute_error(u, u_exact, hx):
     """Compute discrete l2 error"""
     error_vec = u - u_exact
-    relative_l2_error = l2_norm(error_vec, hx)/l2_norm(u_exact, hx)
-    return relative_l2_error
+    # relative_l2_error = l2_norm(error_vec, hx)/l2_norm(u_exact, hx)
+    print(hx)
+    error = l2_norm(error_vec,hx)
+    return error 
     # error = l2_norm(error_vec,hx)
     # return error
 
