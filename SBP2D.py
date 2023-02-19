@@ -4,6 +4,7 @@ import scipy.linalg as splg
 import scipy.sparse as spsp
 from scipy.sparse import kron, csc_matrix, eye, vstack, bmat
 from mpl_toolkits.mplot3d import Axes3D
+import math
 
 import operators as ops
 import matplotlib.pyplot as plt
@@ -92,6 +93,7 @@ def run_simulation(mx, my, show_animation=True):
     for y in range(my):
         for x in range(mx):
             u[y*mx + x] = np.exp((-(hx*x-1)**2-(hy*y-1/2)**2)/0.05**2)
+            # u[y*mx + x] = np.cos(2*np.pi*(hx*x-1))*np.cos(2*np.pi*(hy*y-1))*np.cos(c*math.sqrt((2*np.pi*(hx*x-1))**2 + (2*np.pi*(hy*y-1))**2)*0)
     
     w = np.array([u,u_t])
     
