@@ -47,7 +47,20 @@ def run_simulation(mx, my, show_animation=True):
     # _, _, D1 = ops.periodic_expl(mx, hx, order)
     H,HIx,D1,D2x,e_lx,e_rx,d1_lx,d1_rx = ops.sbp_cent_6th(mx,hx)
     H,HIy,D1,D2y,e_ly,e_ry,d1_ly,d1_ry = ops.sbp_cent_6th(my,hy)
-    # print(D2x[125])
+    e_lx = np.array(e_lx.toarray())
+    e_rx = np.array(e_rx.toarray())
+    d1_lx = np.array(d1_lx.toarray())
+    d1_rx = np.array(d1_rx.toarray())
+    HIx = np.array(HIx.toarray())
+    D2x = np.array(D2x.toarray())
+
+    e_ly = np.array(e_ly.toarray())
+    e_ry = np.array(e_ry.toarray())
+    d1_ly = np.array(d1_ly.toarray())
+    d1_ry = np.array(d1_ry.toarray())
+    HIy = np.array(HIy.toarray())
+    D2y = np.array(D2y.toarray())
+
     c = 3
     tauL = c**2
     tauR = -c**2
@@ -72,18 +85,13 @@ def run_simulation(mx, my, show_animation=True):
     u = np.zeros((mx*my))
     u_t = np.zeros((mx*my))
     for y in range(my):
-        for x in range(mx):
-            # print(hx*x-1)
-        
+        for x in range(mx):        
             u[y*mx + x] = np.exp((-(hx*x-1)**2-(hy*y-1/2)**2)/0.05**2)
-    
-    # print(u.tolist())
     
     w = np.array([u,u_t])
 
     # Initialize plot for animation
     if show_animation:
-        
         plt.show()
     # Loop over all time steps
     for tidx in range(mt):
