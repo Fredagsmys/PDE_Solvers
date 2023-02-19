@@ -28,7 +28,8 @@ def run_simulation(mx, method, show_animation=True):
     """
     # Space discretization
     hx = (xr - xl)/(mx-1)
-    xvec = np.linspace(xl, xr-hx, mx) # periodic, u(xl) = u(xr)
+    xvec = np.linspace(xl, xr, mx) # periodic, u(xl) = u(xr)
+    xvec = xvec.reshape(mx,1)
     # _, _, D1 = ops.periodic_expl(mx, hx, order)
     H,HI,D1,D2,e_l,e_r,d1_l,d1_r = method(mx,hx)
 
@@ -43,7 +44,7 @@ def run_simulation(mx, method, show_animation=True):
 
     # Define right-hand-side function
     def rhs(u):
-        res = np.array([u[1],D@u[0]])
+        res = np.array([u[1],D.astype(float)@u[0].astype(float)])
         #w_t = A*w
         # print(res)
         return res
@@ -98,7 +99,6 @@ def compute_error(u, u_exact, hx):
     """Compute discrete l2 error"""
     error_vec = u - u_exact
     # relative_l2_error = l2_norm(error_vec, hx)/l2_norm(u_exact, hx)
-    print(hx)
     error = l2_norm(error_vec,hx)
     return error 
     # error = l2_norm(error_vec,hx)
@@ -118,7 +118,7 @@ def plot_final_solution(u, u_exact, xvec, T):
 def main():
     ms = np.array([25,50,100,200])
     hs = (xr - xl)/(ms-1)
-    print(hs)
+    
     # ms = np.array([800])
     methods = np.array([ops.sbp_cent_2nd, ops.sbp_cent_4th, ops.sbp_cent_6th])
     # methods = np.array([ops.sbp_cent_6th])
@@ -132,16 +132,16 @@ def main():
             errors[i][j] = error
             print(f'SBP order :{str((1+i)*2)}, L2-error m={m}: {error:.2e}')
             # plot_final_solution(u[0], u_exact, xvec, T)
-    plt.loglog(hs,errors[0])
-    plt.loglog(hs,errors[1])
-    plt.loglog(hs,errors[2])
+    plt.loglog(hs,errors[0],label="Order 2")
+    plt.loglog(hs,errors[1],label="Order 4")
+    plt.loglog(hs,errors[2],label="Order 6")
     print(errors)
     plt.grid(visible=True)
-    plt.xlabel('grid spacing')
+    plt.xlabel('Grid spacing')
     plt.ylabel('l2 error')
+    plt.legend()
     plt.savefig('meth.png')
     plt.show()
-    print(errors)
 
 if __name__ == '__main__':
     main()    
