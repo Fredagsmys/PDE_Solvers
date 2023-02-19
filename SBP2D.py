@@ -110,7 +110,7 @@ def main():
     mx = 200
     my = 100
     tstart = time()
-    u, T, X, Y, hx, hy, L, c = run_simulation(mx=mx, my=my, show_animation=True)  
+    u, T, X, Y, hx, hy, L, c = run_simulation(mx=mx, my=my, show_animation=False)  
     tend = time()
     print(tend-tstart)
     solution = np.reshape(u[0],(my,mx))
