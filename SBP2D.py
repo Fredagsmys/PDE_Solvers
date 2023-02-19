@@ -96,7 +96,7 @@ def run_simulation(mx, my, show_animation=True):
     if show_animation:
         plt.close()
 
-    return w, T, X, Y, hx, hy, L, c
+    return w, T, X, Y, hx, hy, c
 
 def plot_final_solution(u, X, Y, T):
     ax = plt.axes(projection='3d')
@@ -110,7 +110,7 @@ def main():
     mx = 200
     my = 100
     tstart = time()
-    u, T, X, Y, hx, hy, L, c = run_simulation(mx=mx, my=my, show_animation=False)  
+    u, T, X, Y, hx, hy, c = run_simulation(mx=mx, my=my, show_animation=False)  
     tend = time()
     print(tend-tstart)
     solution = np.reshape(u[0],(my,mx))
