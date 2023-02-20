@@ -52,12 +52,10 @@ def run_simulation(mx, my, show_animation=True):
     # Define right-hand-side function
     def rhs(u):
         HL = np.array([u[1],D@u[0]])
-        
-        # print(HL)
         return HL
     # Time discretization
     ht_try = 0.1*hx/c
-    mt = int(np.ceil(T/ht_try+1)) # round up so that (mt-1)*ht = T
+    mt = int(np.ceil(T/ht_try+1))
     tvec, ht = np.linspace(0, T, mt, retstep=True)
 
     # Initialize time variable and solution vector
