@@ -38,10 +38,9 @@ def run_simulation(mx, my, show_animation=True):
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.set_zlabel('z')
-    H,HIx,D1,D2x,e_lx,e_rx,d1_lx,d1_rx = ops.sbp_cent_6th(mx,hx)
-    H,HIy,D1,D2y,e_ly,e_ry,d1_ly,d1_ry = ops.sbp_cent_6th(my,hy)
+    H,HIx,D1,D2x,e_lx,e_rx,d1_lx,d1_rx = ops.sbp_cent_2nd(mx,hx)
+    H,HIy,D1,D2y,e_ly,e_ry,d1_ly,d1_ry = ops.sbp_cent_2nd(my,hy)
 
-    c = 1
     tauL = c**2
     tauR = -c**2
 
@@ -58,7 +57,7 @@ def run_simulation(mx, my, show_animation=True):
         return HL
     # Time discretization
     ht_try = 0.1*hx/c
-    mt = int(np.ceil(T/ht_try)) # round up so that (mt-1)*ht = T
+    mt = int(np.ceil(T/ht_try+1)) # round up so that (mt-1)*ht = T
     tvec, ht = np.linspace(0, T, mt, retstep=True)
 
     # Initialize time variable and solution vector
@@ -82,7 +81,7 @@ def run_simulation(mx, my, show_animation=True):
         # Take one step with the fourth order Runge-Kutta method.
         w, t = rk4.step(rhs, w, t, ht)
         # Update plot every 50th time step
-        if tidx % 10 == 0 and show_animation: 
+        if tidx % 30 == 0 and show_animation: 
             solution = np.reshape(w[0],(my,mx))
             ax.clear()
             ax.contour3D(X, Y, solution, 150, cmap='cool')
@@ -110,7 +109,7 @@ def main():
     mx = 200
     my = 100
     tstart = time()
-    u, T, X, Y, hx, hy, c = run_simulation(mx=mx, my=my, show_animation=False)  
+    u, T, X, Y, hx, hy, c = run_simulation(mx=mx, my=my, show_animation=True)  
     tend = time()
     print(tend-tstart)
     solution = np.reshape(u[0],(my,mx))

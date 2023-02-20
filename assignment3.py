@@ -97,12 +97,14 @@ def plot_final_solution(u, u_exact, xvec, T):
     plt.plot(xvec, u_exact, 'r--', label='Exact')
     ax.set_xlim([xvec[0], xvec[-1]])
     ax.set_ylim([-1, 1.2])
+    ax.set_ylabel('φ')
+    ax.set_xlabel('x')
     plt.title(f't = {T:.2f}')
     plt.legend()
     plt.show()
 
 def main():
-    ms = np.array([25, 50, 100, 200])
+    ms = np.array([25, 50, 100, 200,400])
     hs = (xr - xl)/(ms-1)
     
     methods = np.array([ops.sbp_cent_2nd, ops.sbp_cent_4th, ops.sbp_cent_6th])
