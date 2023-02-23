@@ -3,7 +3,8 @@ import scipy.sparse.linalg as spsplg
 import scipy.linalg as splg
 import scipy.sparse as spsp
 from scipy.sparse import kron, csc_matrix, eye, vstack, bmat
-from mpl_toolkits.mplot3d import Axes3D
+# from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits import mplot3d
 import math
 
 import operators as ops
@@ -82,7 +83,7 @@ def run_simulation(mx, my, show_animation=True):
         if tidx % 30 == 0 and show_animation: 
             solution = np.reshape(w[0],(my,mx))
             ax.clear()
-            ax.contour3D(X, Y, solution, 150, cmap='cool')
+            ax.plot_surface(X, Y, solution, cmap='cool')
             ax.set_title(f't = {t:.2f}')
             ax.set_xlim(-1,1)
             ax.set_ylim(-1/2,1/2)
@@ -100,7 +101,7 @@ def plot_final_solution(u, X, Y):
     ax.set_ylim(-1/2,1/2)
     ax.set_xlim(-1,1)
     ax.set_zlim(0,1.1)
-    ax.contour3D(X, Y, u, 100, cmap="rainbow")
+    ax.plot_surface(X, Y, u, cmap="cool")
     plt.show()
     
 def main():
