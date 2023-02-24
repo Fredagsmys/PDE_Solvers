@@ -80,7 +80,7 @@ def run_simulation(mx, my, show_animation=True):
         # Take one step with the fourth order Runge-Kutta method.
         w, t = rk4.step(rhs, w, t, ht)
         # Update plot every 50th time step
-        if tidx % 30 == 0 and show_animation: 
+        if tidx % 10 == 0 and show_animation: 
             solution = np.reshape(w[0],(my,mx))
             ax.clear()
             ax.plot_surface(X, Y, solution, cmap='cool')
@@ -101,7 +101,7 @@ def plot_final_solution(u, X, Y):
     ax.set_ylim(-1/2,1/2)
     ax.set_xlim(-1,1)
     ax.set_zlim(0,1.1)
-    ax.plot_surface(X, Y, u, cmap="cool")
+    ax.plot3D(X, Y, u)
     plt.show()
     
 def main():
