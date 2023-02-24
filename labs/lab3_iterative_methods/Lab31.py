@@ -45,5 +45,5 @@ def timed_runs():
             _, _, _, _, _  = soapfilm(Nx, Ny, plot_solution)
 
 if __name__ == '__main__':
-    main()
-    #timed_runs()
+    # main()
+    timed_runs()

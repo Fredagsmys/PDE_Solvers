@@ -103,7 +103,8 @@ def laplace_equation(N, method, show_plots = True):
             r -= alpha*w
             rho_prev = rho
             rho = nplg.norm(r)**2
-            p = r + (rho/rho_prev)*p
+            gamma = rho/rho_prev
+            p = r + gamma*p
     else:
         print(f'Unknown method {method}')
 

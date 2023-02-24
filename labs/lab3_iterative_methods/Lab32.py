@@ -1,4 +1,5 @@
 from laplace_equation import laplace_equation
+from time import time
 
 ######################################################################################
 ##                                                                                  ##
@@ -21,9 +22,15 @@ from laplace_equation import laplace_equation
 
 def main():
     N = 100
-    laplace_equation(N, 'jacobi')
-    laplace_equation(N, 'gauss-seidel')
-    laplace_equation(N, 'conjugate-gradient')
+    ts = time()
+    laplace_equation(N, 'jacobi',show_plots=False)
+    print(f"j,acobi took: {time()-ts} seconds")
+    ts = time()
+    laplace_equation(N, 'gauss-seidel',show_plots=False)
+    print(f"gauss-seidel took: {time()-ts} seconds")
+    ts = time()
+    laplace_equation(N, 'conjugate-gradient',show_plots=False)
+    print(f"conjugate gradient took: {time()-ts} seconds")
     
 
 if __name__ == '__main__':
