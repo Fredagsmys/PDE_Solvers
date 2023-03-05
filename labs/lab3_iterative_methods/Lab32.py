@@ -24,7 +24,7 @@ def main():
     N = 100
     ts = time()
     laplace_equation(N, 'jacobi',show_plots=False)
-    print(f"j,acobi took: {time()-ts} seconds")
+    print(f"jacobi took: {time()-ts} seconds")
     ts = time()
     laplace_equation(N, 'gauss-seidel',show_plots=False)
     print(f"gauss-seidel took: {time()-ts} seconds")
@@ -32,6 +32,5 @@ def main():
     laplace_equation(N, 'conjugate-gradient',show_plots=False)
     print(f"conjugate gradient took: {time()-ts} seconds")
     
-
 if __name__ == '__main__':
     main()
