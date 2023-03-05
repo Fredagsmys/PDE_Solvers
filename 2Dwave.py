@@ -100,15 +100,16 @@ def plot_final_solution(u, X, Y):
     ax = plt.axes(projection='3d')
     ax.set_ylim(-1/2,1/2)
     ax.set_xlim(-1,1)
-    ax.set_zlim(0,1.1)
-    ax.plot3D(X, Y, u)
+    ax.set_zlim(0,1)
+    ax.plot_surface(X, Y, u, cmap="cool")
     plt.show()
+    plt.pause(3)
     
 def main():
-    mx = 200
     my = 100
+    mx = 200
     tstart = time()
-    u, T, X, Y, hx, hy, c = run_simulation(mx=mx, my=my, show_animation=True)  
+    u, T, X, Y, hx, hy, c = run_simulation(mx=mx, my=my, show_animation=False)  
     tend = time()
     print(tend-tstart)
     solution = np.reshape(u[0],(my,mx))
